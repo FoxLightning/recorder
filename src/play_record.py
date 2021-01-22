@@ -2,7 +2,7 @@ import pyaudio
 import wave
 import numpy
 
-CHUNK = 32
+CHUNK = 64
 FORMAT = pyaudio.paInt16
 CHANNELS = 2
 RATE = 44100
@@ -32,9 +32,11 @@ frames = []
 
 print("* recording")
 
-for _ in range(0, int(RATE / CHUNK * RECORD_SECONDS)):
+start = 0
+while start < int(RATE / CHUNK * RECORD_SECONDS):
+    start += 1
     data = stream.read(CHUNK)  # get audiosteam
-    data = audio_datalist_set_volume(data, 4) # multiply volume
+    data = audio_datalist_set_volume(data, 2)  # multiply volume
     stream.write(data)  # play audio
     frames.append(data)  # write audio
 
