@@ -1,12 +1,19 @@
 import pyaudio
 import wave
+import numpy
 
-CHUNK = 128
+CHUNK = 32
 FORMAT = pyaudio.paInt16
 CHANNELS = 2
 RATE = 44100
-RECORD_SECONDS = 5
-WAVE_OUTPUT_FILENAME = "output.wav"
+RECORD_SECONDS = 10
+WAVE_OUTPUT_FILENAME = "one.wav"
+
+def audio_datalist_set_volume(chunk, multiply):
+    chunk = numpy.fromstring(chunk, numpy.int8) 
+    chunk = chunk * multiply
+    return chunk.astype(numpy.int8)
+
 
 p = pyaudio.PyAudio()
 
@@ -17,6 +24,7 @@ stream = p.open(
     input=True,
     output=True,
     input_device_index=7,
+    output_device_index=12,
     frames_per_buffer=CHUNK
 )
 
@@ -25,7 +33,8 @@ frames = []
 print("* recording")
 
 for _ in range(0, int(RATE / CHUNK * RECORD_SECONDS)):
-    data = stream.read(CHUNK)
+    data = stream.read(CHUNK)  # get audiosteam
+    data = audio_datalist_set_volume(data, 4) # multiply volume
     stream.write(data)  # play audio
     frames.append(data)  # write audio
 
