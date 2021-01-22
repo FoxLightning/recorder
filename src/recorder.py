@@ -1,17 +1,22 @@
-import pyaudio
-import wave
-import numpy
-from threading import Thread
 import sys
+import wave
+from threading import Thread
+
+import numpy
+import pyaudio
+
+import mute_alsa  # noqa
 
 MIN_RECORD_SECONDS = 5
 MAX_RECORD_SECONDS = 10
 WAVE_OUTPUT_FILENAME = "one.wav"
 
+
 def audio_datalist_set_volume(chunk, multiply):
-    chunk = numpy.fromstring(chunk, numpy.int8) 
+    chunk = numpy.fromstring(chunk, numpy.int8)
     chunk = chunk * multiply
     return chunk.astype(numpy.int8)
+
 
 def record(WAVE_OUTPUT_FILENAME):
     global MAX_RECORD_SECONDS
@@ -37,7 +42,6 @@ def record(WAVE_OUTPUT_FILENAME):
 
     print("* recording")
 
-    # for _ in range(0, int(RATE / CHUNK * RECORD_SECONDS)):
     start = 0
     while start < int(RATE / CHUNK * MAX_RECORD_SECONDS):
         start += 1
@@ -60,13 +64,17 @@ def record(WAVE_OUTPUT_FILENAME):
     wf.writeframes(b''.join(frames))
     wf.close()
 
-th1 = Thread(target=record, args=(WAVE_OUTPUT_FILENAME,))
-th1.daemon = True
-th1.start()  # start three MAX_TIME
 
-print("type 's' for stop recording\nCtrl+D to out from input mode")
-a = sys.stdin.readline().strip()
+if __name__ == "__main__":
+    WAVE_OUTPUT_FILENAME = sys.argv[1]
 
-MAX_RECORD_SECONDS = MIN_RECORD_SECONDS if a == 's' else MAX_RECORD_SECONDS
+    th1 = Thread(target=record, args=(WAVE_OUTPUT_FILENAME,))
+    th1.daemon = True
+    th1.start()  # start three MAX_TIME
 
-th1.join()
+    print("type 's' for stop recording\nCtrl+D to out from input mode")
+    a = sys.stdin.readline().strip()
+
+    MAX_RECORD_SECONDS = MIN_RECORD_SECONDS if a == 's' else MAX_RECORD_SECONDS
+
+    th1.join()
