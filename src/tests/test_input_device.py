@@ -27,7 +27,9 @@ def callback(indata, outdata, frames, time, status):
 
 
 def init_input_test():
-# if __name__ == "__main__":
+    print('#' * 80)
+    print('Output input test')
+
     SAMPLING_RATE = 48_000
     TEST_LENGTH = 5
 
@@ -43,8 +45,6 @@ def init_input_test():
             if device['max_input_channels']:
                 print(id, device['name'])
                 sd.default.device = id, device_io.get_output()
-                exit_condition = False
-
                 with sd.Stream(channels=1, callback=callback, samplerate=SAMPLING_RATE):
                     sd.sleep(TEST_LENGTH * 1_000)
 
@@ -53,7 +53,6 @@ def init_input_test():
                 input_value = input()
                 if input_value.lower() == 'y':
                     device_io.set_input(id)
-                    exit_condition = True
                     break
         except PortAudioError:
             print('something goes wrong with previous device')

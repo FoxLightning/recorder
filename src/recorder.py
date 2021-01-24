@@ -5,6 +5,12 @@ import numpy as np
 import sounddevice as sd
 import soundfile as sf
 
+from utils import json_manipulator
+
+from tests.test_input_device import init_input_test
+from tests.test_output_device import init_output_test
+import sys
+import argparse
 
 # configuration variables
 FILE_NAME = 'my_record.flac'
@@ -22,6 +28,9 @@ storage = np.empty(shape=(array_length, CHENNELS), dtype=np.float32)
 run_record = True
 current_frame = 0
 input_alive = True
+
+# init json manipulator
+device_io = json_manipulator.DevicesIO()
 
 
 def callback(indata, outdata, frames, time, status):
@@ -62,17 +71,55 @@ def record_control():
             print('Incorect input. Input "s" to stop record')
 
 
+def apply_and_show_devices():
+    sd.default.device = int(device_io.get_input()), int(device_io.get_output())
+    print('#' * 80)
+    print('Device list')
+    device_list = sd.query_devices(device=None, kind=None)
+    print(device_list)
+
+
+def fast_device_choice():
+    apply_and_show_devices()
+    id_input_device = input('Enter id of input device: ')
+    id_output_device = input('Enter id of output device: ')
+    device_io.set_input(id_input_device)
+    device_io.set_output(id_output_device)
+
+def createParser ():
+    parser = argparse.ArgumentParser()
+    parser.add_argument ('-p', '--path')
+ 
+    return parser
+
+
 if __name__ == "__main__":
+    # prase args
+    parser = createParser()
+    namespace = parser.parse_args(sys.argv[1:])
+    if not namespace.path:
+        pass # create path
+
+
     # choice the i/o device
-    print('Device list')
-    device_list = sd.query_devices(device=None, kind=None)
-    print(device_list)
-    id_input_device = input('Enter id of input devie: ')
-    id_output_device = input('Enter id of output devie: ')
-    sd.default.device =  int(id_input_device), int(id_output_device)
-    print('Device list')
-    device_list = sd.query_devices(device=None, kind=None)
-    print(device_list)
+    input_data = ''
+    while input_data != 'r':
+        print("Press 't' test and choice i/o device")
+        print("Press 'f' fast choice i/o device")
+        print("Press 's' show choisen i/o device")
+        print("Press 'r' start record")
+        input_data = input().lower()
+        if input_data == 't':
+            init_output_test()
+            init_input_test()
+            device_io = json_manipulator.DevicesIO()
+            apply_and_show_devices()
+        elif input_data == 'f':
+            fast_device_choice()
+            apply_and_show_devices()
+        elif input_data == 's':
+            apply_and_show_devices()
+
     # create threes
     record_tree = Thread(target=record, args=(callback, SOUND_FREQUENCY, MAX_RECORD_TIME))
     input_tree = Thread(target=record_control)
@@ -85,7 +132,7 @@ if __name__ == "__main__":
 
     # join write three and save data
     record_tree.join()
-    sf.write('myfile.flac', storage[:current_frame], SOUND_FREQUENCY)  # write sound data to persistent storage
+    sf.write(namespace.path, storage[:current_frame], SOUND_FREQUENCY)  # write sound data to persistent storage
     print(f'Record finished, length: {round(current_frame / SOUND_FREQUENCY, 3)}')  # info
     
     # close input

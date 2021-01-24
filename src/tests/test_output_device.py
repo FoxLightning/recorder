@@ -42,6 +42,9 @@ def play_audio(signal, samplerate, seconds=5):
 
 
 def init_output_test():
+    print('#' * 80)
+    print('Output device test')
+    
     sampling_rate = 48_000
     length_seconds = 5
 
