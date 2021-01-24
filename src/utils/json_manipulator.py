@@ -20,7 +20,7 @@ class DevicesIO:
 
     def __str__(self):
         return str(self.data)
-    
+
     def write_to_disc(self):
         with open(self.path, "w") as write_file:
             json.dump(self.data, write_file)
@@ -35,7 +35,7 @@ class DevicesIO:
 
     def get_input(self):
         return self.data['input']
-    
+
     def get_output(self):
         return self.data['output']
 

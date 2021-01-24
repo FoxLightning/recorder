@@ -1,3 +1,4 @@
+import argparse
 import sys
 from threading import Thread
 
@@ -5,18 +6,16 @@ import numpy as np
 import sounddevice as sd
 import soundfile as sf
 
-from utils import json_manipulator
-
 from tests.test_input_device import init_input_test
 from tests.test_output_device import init_output_test
-import sys
-import argparse
+from utils import json_manipulator
+from utils.generate_path import default_path
 
 # configuration variables
 FILE_NAME = 'my_record.flac'
 SOUND_FREQUENCY = 48_000
 MIN_RECORD_TIME = 5.0
-MAX_RECORD_TIME = 10.0 
+MAX_RECORD_TIME = 60.0
 CHENNELS = 2
 
 # technical variables
@@ -59,7 +58,7 @@ def record(callback, samplerate, record_time):
 def record_control():
     global run_record, input_alive
     sd.sleep(500)  # write print below after warning log
-    print(f'Input "s" to stop record')
+    print('Input "s" to stop record')
 
     while input_alive and run_record:
         input_data = input()
@@ -86,20 +85,18 @@ def fast_device_choice():
     device_io.set_input(id_input_device)
     device_io.set_output(id_output_device)
 
-def createParser ():
+
+def createParser():
     parser = argparse.ArgumentParser()
-    parser.add_argument ('-p', '--path')
- 
+    parser.add_argument('-p', '--path')
     return parser
 
 
 if __name__ == "__main__":
-    # prase args
+    # prase args, create path
     parser = createParser()
     namespace = parser.parse_args(sys.argv[1:])
-    if not namespace.path:
-        pass # create path
-
+    path = namespace.path if namespace.path else default_path()
 
     # choice the i/o device
     input_data = ''
@@ -121,21 +118,24 @@ if __name__ == "__main__":
             apply_and_show_devices()
 
     # create threes
-    record_tree = Thread(target=record, args=(callback, SOUND_FREQUENCY, MAX_RECORD_TIME))
+    record_tree = Thread(target=record,
+                         args=(callback, SOUND_FREQUENCY, MAX_RECORD_TIME))
     input_tree = Thread(target=record_control)
 
     # start threes
     record_tree.start()
     sd.sleep(400)  # write print below after warning log
-    print(f'* record')
+    print('* record')
     input_tree.start()
 
     # join write three and save data
     record_tree.join()
-    sf.write(namespace.path, storage[:current_frame], SOUND_FREQUENCY)  # write sound data to persistent storage
-    print(f'Record finished, length: {round(current_frame / SOUND_FREQUENCY, 3)}')  # info
-    
+    # write sound data to persistent storage
+    sf.write(path, storage[:current_frame], SOUND_FREQUENCY)
+    length = current_frame / SOUND_FREQUENCY
+    print(f'Record finished, length: {round(length, 3)}')
+
     # close input
     if input_alive:
-        print(f'Input something to exit')
+        print('Input something to exit')
     input_tree.join()

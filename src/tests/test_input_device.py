@@ -1,18 +1,17 @@
+import inspect
+import os
 import sys
-from threading import Thread
 
-import numpy as np
+import numpy as np  # noqa
 import sounddevice as sd
-import soundfile as sf
-
 from sounddevice import PortAudioError
 
-import os,sys,inspect
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+currentdir_path = os.path.abspath(inspect.getfile(inspect.currentframe()))
+currentdir = os.path.dirname(currentdir_path)
 parentdir = os.path.dirname(currentdir)
-sys.path.insert(0,parentdir) 
+sys.path.insert(0, parentdir)
 
-from utils import json_manipulator
+from utils import json_manipulator  # noqa
 
 
 def callback(indata, outdata, frames, time, status):
@@ -22,8 +21,6 @@ def callback(indata, outdata, frames, time, status):
     if status:
         print(status)
     outdata[:] = indata
-
-
 
 
 def init_input_test():
@@ -45,7 +42,8 @@ def init_input_test():
             if device['max_input_channels']:
                 print(id, device['name'])
                 sd.default.device = id, device_io.get_output()
-                with sd.Stream(channels=1, callback=callback, samplerate=SAMPLING_RATE):
+                with sd.Stream(channels=1, callback=callback,
+                               samplerate=SAMPLING_RATE):
                     sd.sleep(TEST_LENGTH * 1_000)
 
                 print("'y' set this device as active and exit")
