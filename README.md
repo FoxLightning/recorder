@@ -1,5 +1,10 @@
 # recorder
 
+## Instalation
+- pip install -r requairements.txt
+- sudo apt-get install ffmpeg
+- sudo apt-get install libsndfile1
+    
 ## Manual
 1. To run from {our path}/recorder/
     - files will be saved in {our path}/recorder/src/records/ 
