@@ -3,15 +3,15 @@
 ## Manual
 1. To run from {our path}/recorder/
     - files will be saved in {our path}/recorder/src/records/ 
-    * name consist from date and time 
+        - name consist from date and time 
     $ python3 src/recorder.py
     - files will be saved in {input}
     $ python3 src/recorder.py -p {input}
 2. You choice and test device for input and output sound
     - 't' test and choice i/o devices
-        * at first, script goes throught all output devices and gives them a sound
+        - at first, script goes throught all output devices and gives them a sound
         if you hire the sound and wont to choise device, type y
-        * at last, script goes throught all input devices and redirect sound from
+        - at last, script goes throught all input devices and redirect sound from
         their to choisen output device
     - 'f' print list of avilable devices and id of devices what you want to choice
     - 's' show avilable devices
